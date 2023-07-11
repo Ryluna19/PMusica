@@ -1,4 +1,4 @@
-<h1 align="center">  💻 Projeto Music Player</h1>
+<h1 align="center">   Projeto Music Player</h1>
 
 <p align="center">
 Programa exclusivo e gratuito <br/>
@@ -19,8 +19,12 @@ Programa exclusivo e gratuito <br/>
 <br>
 
 <p align="center">
-  <img alt="Profile Teste" src=".github/recording-2023-05-08-16-54-07.webm" width="100%">
+  <img alt="Profile Teste" src=".github/Preview.png" width="100%">
 </p>
+
+## 💻 Baixe o Video de Demonstração Nos Arquvios
+
+   [label](recording-2023-05-08-16-54-07.webm)
 
 ## 🚀 Tecnologias
 

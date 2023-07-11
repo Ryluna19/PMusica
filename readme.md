@@ -24,7 +24,10 @@ Programa exclusivo e gratuito <br/>
 
 ## 💻 Baixe o Video de Demonstração Nos Arquvios
 
-   [label](recording-2023-05-08-16-54-07.webm)
+<p align="center">
+  <a href="https://github.com/Ryluna19/PMusica/blob/main/recording-2023-05-08-16-54-07.webm"><i >Redirecione Aqui</i></a>
+</p>
+
 
 ## 🚀 Tecnologias
 

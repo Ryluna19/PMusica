@@ -19,7 +19,7 @@ Programa exclusivo e gratuito <br/>
 <br>
 
 <p align="center">
-  <img alt="Profile Teste" src="./github/recording-2023-05-08-16-54-07.webm" width="100%">
+  <img alt="Profile Teste" src=".github/recording-2023-05-08-16-54-07.webm" width="100%">
 </p>
 
 ## 🚀 Tecnologias

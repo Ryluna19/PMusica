@@ -21,179 +21,217 @@ connectToDatabase();
 
 // Get unique playlist names for form suggestions
 function getPlaylistOptions(songs) {
-  const playlists = songs.map((song) => song.playlist || "Geral");
+    const playlists = songs.map((song) => song.playlist || "Geral");
 
-  return [...new Set(["Geral", ...playlists])].sort((a, b) =>
-    a.localeCompare(b)
-  );
+    return [...new Set(["Geral", ...playlists])].sort((a, b) =>
+        a.localeCompare(b)
+    );
 }
 
 // Build playlist sidebar data with name, song count and cover image
 function getPlaylistData(songs) {
-  const playlistMap = new Map();
+    const playlistMap = new Map();
 
-  // Songs are loaded newest first, so reverse to get the first added cover
-  const songsFromOldest = [...songs].reverse();
+    // Songs are loaded newest first, so reverse to get the first added cover
+    const songsFromOldest = [...songs].reverse();
 
-  songsFromOldest.forEach((song) => {
-    const playlistName = song.playlist || "Geral";
+    songsFromOldest.forEach((song) => {
+        const playlistName = song.playlist || "Geral";
 
-    if (!playlistMap.has(playlistName)) {
-      playlistMap.set(playlistName, {
-        name: playlistName,
-        count: 0,
-        coverImage: song.linkImage
-      });
+        if (!playlistMap.has(playlistName)) {
+            playlistMap.set(playlistName, {
+                name: playlistName,
+                count: 0,
+                coverImage: song.linkImage
+            });
+        }
+    });
+
+    songs.forEach((song) => {
+        const playlistName = song.playlist || "Geral";
+        const playlistInfo = playlistMap.get(playlistName);
+
+        if (playlistInfo) {
+            playlistInfo.count += 1;
+        }
+    });
+
+    return [...playlistMap.values()].sort((a, b) =>
+        a.name.localeCompare(b.name)
+    );
+}
+
+// Get feedback message based on query parameters
+function getFeedbackMessage(query) {
+    if (query.success === "created") {
+        return {
+            type: "success",
+            text: "Música cadastrada com sucesso!"
+        };
     }
-  });
 
-  songs.forEach((song) => {
-    const playlistName = song.playlist || "Geral";
-    const playlistInfo = playlistMap.get(playlistName);
-
-    if (playlistInfo) {
-      playlistInfo.count += 1;
+    if (query.success === "updated") {
+        return {
+            type: "success",
+            text: "Música atualizada com sucesso!"
+        };
     }
-  });
 
-  return [...playlistMap.values()].sort((a, b) =>
-    a.name.localeCompare(b.name)
-  );
+    if (query.success === "deleted") {
+        return {
+            type: "success",
+            text: "Música apagada com sucesso!"
+        };
+    }
+
+    if (query.error === "missing-fields") {
+        return {
+            type: "error",
+            text: "Preencha todos os campos obrigatórios."
+        };
+    }
+
+    return null;
 }
 
 // Application routes
 
 // Render the main playlist page
 app.get("/", async (req, res) => {
-  try {
-    const playlist = await Music.find().sort({ createdAt: -1 });
-    const playlistOptions = getPlaylistOptions(playlist);
-    const playlistData = getPlaylistData(playlist);
+    try {
+        const playlist = await Music.find().sort({ createdAt: -1 });
+        const playlistOptions = getPlaylistOptions(playlist);
+        const playlistData = getPlaylistData(playlist);
 
-    res.render("index", {
-      playlist,
-      playlistOptions,
-      playlistData
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Erro ao carregar a playlist.");
-  }
+        res.render("index", {
+            playlist,
+            playlistOptions,
+            playlistData
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Erro ao carregar a playlist.");
+    }
 });
 
 // Render the admin page with songs and playlist suggestions
+// Render the admin page with songs and playlist suggestions
 app.get("/admin", async (req, res) => {
-  try {
-    const playlist = await Music.find().sort({ createdAt: -1 });
-    const playlistOptions = getPlaylistOptions(playlist);
+    try {
+        const playlist = await Music.find().sort({ createdAt: -1 });
+        const playlistOptions = getPlaylistOptions(playlist);
+        const feedbackMessage = getFeedbackMessage(req.query);
 
-    res.render("admin", {
-      playlist,
-      playlistOptions,
-      music: null,
-      musicDel: null
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Erro ao carregar o painel admin.");
-  }
+        res.render("admin", {
+            playlist,
+            playlistOptions,
+            feedbackMessage,
+            music: null,
+            musicDel: null
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Erro ao carregar o painel admin.");
+    }
 });
 
 // Create a new song
 app.post("/create", async (req, res) => {
-  try {
-    const { name, author, playlist, linkImage, linkMusic } = req.body;
+    try {
+        const { name, author, playlist, linkImage, linkMusic } = req.body;
 
-    if (!name || !author || !linkImage || !linkMusic) {
-      return res.status(400).send("Preencha todos os campos.");
+        if (!name || !author || !linkImage || !linkMusic) {
+            return res.redirect("/admin?error=missing-fields");
+        }
+
+        await Music.create({
+            name,
+            author,
+            playlist: playlist || "Geral",
+            linkImage,
+            linkMusic
+        });
+
+        res.redirect("/admin?success=created");
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Erro ao cadastrar música.");
     }
-
-    await Music.create({
-      name,
-      author,
-      playlist: playlist || "Geral",
-      linkImage,
-      linkMusic
-    });
-
-    res.redirect("/");
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Erro ao cadastrar música.");
-  }
 });
 
 // Open edit or delete modal
 app.get("/by/:id/:action", async (req, res) => {
-  try {
-    const { id, action } = req.params;
+    try {
+        const { id, action } = req.params;
 
-    const music = await Music.findById(id);
-    const playlist = await Music.find().sort({ createdAt: -1 });
-    const playlistOptions = getPlaylistOptions(playlist);
+        const music = await Music.findById(id);
+        const playlist = await Music.find().sort({ createdAt: -1 });
+        const playlistOptions = getPlaylistOptions(playlist);
 
-    if (!music) {
-      return res.redirect("/admin");
+        if (!music) {
+            return res.redirect("/admin");
+        }
+
+        if (action === "edit") {
+            return res.render("admin", {
+                playlist,
+                playlistOptions,
+                feedbackMessage: null,
+                music,
+                musicDel: null
+            });
+        }
+
+        return res.render("admin", {
+            playlist,
+            playlistOptions,
+            feedbackMessage: null,
+            music: null,
+            musicDel: music
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Erro ao buscar música.");
     }
-
-    if (action === "edit") {
-      return res.render("admin", {
-        playlist,
-        playlistOptions,
-        music,
-        musicDel: null
-      });
-    }
-
-    return res.render("admin", {
-      playlist,
-      playlistOptions,
-      music: null,
-      musicDel: music
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Erro ao buscar música.");
-  }
 });
 
 // Update an existing song
 app.post("/update/:id", async (req, res) => {
-  try {
-    const { name, author, playlist, linkImage, linkMusic } = req.body;
+    try {
+        const { name, author, playlist, linkImage, linkMusic } = req.body;
 
-    if (!name || !author || !linkImage || !linkMusic) {
-      return res.status(400).send("Preencha todos os campos.");
+        if (!name || !author || !linkImage || !linkMusic) {
+            return res.redirect("/admin?error=missing-fields");
+        }
+
+        await Music.findByIdAndUpdate(req.params.id, {
+            name,
+            author,
+            playlist: playlist || "Geral",
+            linkImage,
+            linkMusic
+        });
+
+        res.redirect("/admin?success=updated");
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Erro ao atualizar música.");
     }
-
-    await Music.findByIdAndUpdate(req.params.id, {
-      name,
-      author,
-      playlist: playlist || "Geral",
-      linkImage,
-      linkMusic
-    });
-
-    res.redirect("/admin");
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Erro ao atualizar música.");
-  }
 });
 
 // Delete a song
 app.post("/delete/:id", async (req, res) => {
-  try {
-    await Music.findByIdAndDelete(req.params.id);
+    try {
+        await Music.findByIdAndDelete(req.params.id);
 
-    res.redirect("/admin");
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Erro ao deletar música.");
-  }
+        res.redirect("/admin?success=deleted");
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Erro ao deletar música.");
+    }
 });
 
 // Start server
 app.listen(port, () => {
-  console.log(`Servidor rodando em http://localhost:${port}`);
+    console.log(`Servidor rodando em http://localhost:${port}`);
 });

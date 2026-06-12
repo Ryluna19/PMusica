@@ -29,7 +29,7 @@ let isPlaying = false;
 let selectedPlaylist = "all";
 let filteredIndexes = [];
 
-// Build the playlist data from the music rows rendered by EJS
+// Build playlist data from the music rows rendered by EJS
 const playlist = musicRows.map((row) => ({
   name: row.dataset.name,
   author: row.dataset.author,
@@ -189,7 +189,7 @@ function getPreviousFilteredIndex() {
   return filteredIndexes[currentPosition - 1];
 }
 
-// Play the next visible song based on active filters
+// Play the next visible song
 function nextMusic() {
   const nextIndex = getNextFilteredIndex();
 
@@ -201,7 +201,7 @@ function nextMusic() {
   playMusic();
 }
 
-// Play the previous visible song based on active filters
+// Play the previous visible song
 function previousMusic() {
   const previousIndex = getPreviousFilteredIndex();
 
@@ -213,7 +213,7 @@ function previousMusic() {
   playMusic();
 }
 
-// Event listeners for song selection
+// Handle song row clicks
 musicRows.forEach((row, index) => {
   row.addEventListener("click", () => {
     const isSameMusic = index === currentIndex && audioPlayer.src;
@@ -228,7 +228,7 @@ musicRows.forEach((row, index) => {
   });
 });
 
-// Event listeners for playlist filters
+// Handle playlist filter clicks
 filterButtons.forEach((button) => {
   button.addEventListener("click", () => {
     selectedPlaylist = button.dataset.playlistFilter;
@@ -243,27 +243,27 @@ filterButtons.forEach((button) => {
   });
 });
 
-// Event listener for search input
+// Handle search input
 searchInput.addEventListener("input", applyFilters);
 
-// Event listeners for player controls
+// Handle player controls
 playButton.addEventListener("click", togglePlay);
 nextButton.addEventListener("click", nextMusic);
 prevButton.addEventListener("click", previousMusic);
 
-// Update total duration when audio metadata is loaded
+// Update total duration when audio metadata loads
 audioPlayer.addEventListener("loadedmetadata", () => {
   progressbar.max = Math.floor(audioPlayer.duration);
   totalDuration.innerText = secondsToMinutes(audioPlayer.duration);
 });
 
-// Update progress bar while the song plays
+// Update progress while the song plays
 audioPlayer.addEventListener("timeupdate", () => {
   progressbar.value = Math.floor(audioPlayer.currentTime);
   currentDuration.innerText = secondsToMinutes(audioPlayer.currentTime);
 });
 
-// Automatically play next song when the current one ends
+// Automatically play the next song when current song ends
 audioPlayer.addEventListener("ended", nextMusic);
 
 // Allow user to seek through the song

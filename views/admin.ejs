@@ -1,204 +1,258 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="/style.css">
+  <!-- Icons and styles -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="/style.css">
 
-    <title>Admin | Music Playlist Manager</title>
+  <title>Admin | Music Playlist Manager</title>
 </head>
 
 <body class="admin-page">
-    <nav>
-        <ul>
-            <li>
-                <a href="/" title="Voltar para a playlist">
-                    <span class="material-icons">music_note</span>
-                </a>
-            </li>
+  <!-- Navigation -->
+  <nav>
+    <ul>
+      <li>
+        <a href="/" title="Voltar para a playlist">
+          <span class="material-icons">music_note</span>
+        </a>
+      </li>
 
-            <li>
-                <a href="/" title="Sair do painel">
-                    <i class="bi bi-box-arrow-right"></i>
-                </a>
-            </li>
-        </ul>
-    </nav>
+      <li>
+        <a href="/" title="Sair do painel">
+          <i class="bi bi-box-arrow-right"></i>
+        </a>
+      </li>
+    </ul>
+  </nav>
 
-    <datalist id="playlist-options">
-        <% playlistOptions.forEach((playlistName)=> { %>
-            <option value="<%= playlistName %>"></option>
-            <% }) %>
-    </datalist>
-    <% if (feedbackMessage) { %>
-        <div class="feedback-message <%= feedbackMessage.type %>">
-            <i
-                class="bi <%= feedbackMessage.type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill' %>"></i>
-            <span>
-                <%= feedbackMessage.text %>
-            </span>
+  <!-- Playlist suggestions for form inputs -->
+  <datalist id="playlist-options">
+    <% playlistOptions.forEach((playlistName) => { %>
+      <option value="<%= playlistName %>"></option>
+    <% }) %>
+  </datalist>
+
+  <!-- Feedback message after create, update or delete actions -->
+  <% if (feedbackMessage) { %>
+    <div class="feedback-message <%= feedbackMessage.type %>">
+      <i class="bi <%= feedbackMessage.type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill' %>"></i>
+      <span><%= feedbackMessage.text %></span>
+    </div>
+  <% } %>
+
+  <main class="admin-container">
+    <!-- Page header -->
+    <section class="admin-hero">
+      <span class="eyebrow">Painel administrativo</span>
+      <h1>Gerenciar playlist</h1>
+      <p>Cadastre, edite e remova músicas da sua biblioteca.</p>
+    </section>
+
+    <section class="admin-grid">
+      <!-- Create song form -->
+      <article class="admin-card form-card">
+        <div class="card-header">
+          <div>
+            <span>Nova música</span>
+            <h2>Cadastrar música</h2>
+          </div>
         </div>
+
+        <form class="admin-form" action="/create" method="POST">
+          <label for="name">Nome da música</label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            placeholder="Ex: Blinding Lights"
+            required
+          >
+
+          <label for="author">Artista</label>
+          <input
+            id="author"
+            name="author"
+            type="text"
+            placeholder="Ex: The Weeknd"
+            required
+          >
+
+          <label for="playlist">Playlist</label>
+          <input
+            id="playlist"
+            name="playlist"
+            type="text"
+            list="playlist-options"
+            placeholder="Escolha ou digite uma playlist"
+            value="Geral"
+          >
+
+          <label for="linkImage">Capa</label>
+          <input
+            id="linkImage"
+            name="linkImage"
+            type="url"
+            placeholder="Link da imagem da capa"
+            required
+          >
+
+          <label for="linkMusic">Música</label>
+          <input
+            id="linkMusic"
+            name="linkMusic"
+            type="url"
+            placeholder="Link direto do áudio"
+            required
+          >
+
+          <button type="submit">Cadastrar música</button>
+        </form>
+      </article>
+
+      <!-- Songs library -->
+      <article class="admin-card library-card">
+        <div class="card-header">
+          <div>
+            <span>Biblioteca</span>
+            <h2>Músicas cadastradas</h2>
+          </div>
+
+          <strong><%= playlist.length %></strong>
+        </div>
+
+        <% if (playlist.length === 0) { %>
+          <div class="admin-empty">
+            <div>
+              <i class="bi bi-music-note-list"></i>
+              <p>Nenhuma música cadastrada ainda.</p>
+            </div>
+          </div>
+        <% } else { %>
+          <div class="admin-music-list">
+            <% playlist.forEach((musicItem) => { %>
+              <div class="admin-music-item">
+                <img src="<%= musicItem.linkImage %>" alt="Capa de <%= musicItem.name %>">
+
+                <div class="admin-music-info">
+                  <strong><%= musicItem.name %></strong>
+                  <span><%= musicItem.author %></span>
+                  <small><%= musicItem.playlist || "Geral" %></small>
+                </div>
+
+                <div class="admin-actions">
+                  <a class="edit-action" href="/by/<%= musicItem._id %>/edit">
+                    <i class="bi bi-pencil-square"></i>
+                    Editar
+                  </a>
+
+                  <a class="delete-action" href="/by/<%= musicItem._id %>/delete">
+                    <i class="bi bi-trash"></i>
+                    Apagar
+                  </a>
+                </div>
+              </div>
+            <% }) %>
+          </div>
         <% } %>
-            <main class="admin-container">
-                <section class="admin-hero">
-                    <span class="eyebrow">Painel administrativo</span>
-                    <h1>Gerenciar playlist</h1>
-                    <p>Cadastre, edite e remova músicas da sua biblioteca.</p>
-                </section>
+      </article>
+    </section>
+  </main>
 
-                <section class="admin-grid">
-                    <article class="admin-card form-card">
-                        <div class="card-header">
-                            <div>
-                                <span>Nova música</span>
-                                <h2>Cadastrar música</h2>
-                            </div>
-                        </div>
+  <!-- Edit song modal -->
+  <% if (music) { %>
+    <section id="modal">
+      <div id="card">
+        <h2>Editar música</h2>
 
-                        <form class="admin-form" action="/create" method="POST">
-                            <label for="name">Nome da música</label>
-                            <input id="name" name="name" type="text" placeholder="Ex: Blinding Lights" required>
+        <a id="close-modal" href="/admin">
+          <i class="bi bi-x-lg"></i>
+        </a>
 
-                            <label for="author">Artista</label>
-                            <input id="author" name="author" type="text" placeholder="Ex: The Weeknd" required>
+        <hr>
 
+        <form id="form-modal" action="/update/<%= music._id %>" method="POST">
+          <label for="edit-name">Nome da música</label>
+          <input
+            id="edit-name"
+            name="name"
+            type="text"
+            value="<%= music.name %>"
+            required
+          >
 
-                            <label for="playlist">Playlist</label>
-                            <input id="playlist" name="playlist" type="text" list="playlist-options"
-                                placeholder="Escolha ou digite uma playlist" value="Geral">
+          <label for="edit-author">Artista</label>
+          <input
+            id="edit-author"
+            name="author"
+            type="text"
+            value="<%= music.author %>"
+            required
+          >
 
-                            <label for="linkImage">Capa</label>
-                            <input id="linkImage" name="linkImage" type="url" placeholder="Link da imagem da capa"
-                                required>
+          <label for="edit-playlist">Playlist</label>
+          <input
+            id="edit-playlist"
+            name="playlist"
+            type="text"
+            list="playlist-options"
+            value="<%= music.playlist || 'Geral' %>"
+          >
 
-                            <label for="linkMusic">Música</label>
-                            <input id="linkMusic" name="linkMusic" type="url" placeholder="Link direto do áudio"
-                                required>
+          <label for="edit-linkImage">Capa</label>
+          <input
+            id="edit-linkImage"
+            name="linkImage"
+            type="url"
+            value="<%= music.linkImage %>"
+            required
+          >
 
-                            <button type="submit">Cadastrar música</button>
-                        </form>
-                    </article>
+          <label for="edit-linkMusic">Música</label>
+          <input
+            id="edit-linkMusic"
+            name="linkMusic"
+            type="url"
+            value="<%= music.linkMusic %>"
+            required
+          >
 
-                    <article class="admin-card library-card">
-                        <div class="card-header">
-                            <div>
-                                <span>Biblioteca</span>
-                                <h2>Músicas cadastradas</h2>
-                            </div>
+          <button type="submit">Salvar alterações</button>
+        </form>
+      </div>
+    </section>
+  <% } %>
 
-                            <strong>
-                                <%= playlist.length %>
-                            </strong>
-                        </div>
+  <!-- Delete confirmation modal -->
+  <% if (musicDel) { %>
+    <section id="modal">
+      <div id="card">
+        <h2>Apagar música</h2>
 
-                        <% if (playlist.length===0) { %>
-                            <div class="admin-empty">
-                                <i class="bi bi-music-note-list"></i>
-                                <p>Nenhuma música cadastrada ainda.</p>
-                            </div>
-                            <% } else { %>
-                                <div class="admin-music-list">
-                                    <% playlist.forEach((musicItem)=> { %>
-                                        <div class="admin-music-item">
-                                            <img src="<%= musicItem.linkImage %>" alt="Capa de <%= musicItem.name %>">
+        <a id="close-modal" href="/admin">
+          <i class="bi bi-x-lg"></i>
+        </a>
 
-                                            <div class="admin-music-info">
-                                                <strong>
-                                                    <%= musicItem.name %>
-                                                </strong>
-                                                <span>
-                                                    <%= musicItem.author %>
-                                                </span>
-                                                <small>
-                                                    <%= musicItem.playlist || "Geral" %>
-                                                </small>
-                                            </div>
-                                            <div class="admin-actions">
-                                                <a class="edit-action" href="/by/<%= musicItem._id %>/edit">
-                                                    <i class="bi bi-pencil-square"></i>
-                                                    Editar
-                                                </a>
+        <hr>
 
-                                                <a class="delete-action" href="/by/<%= musicItem._id %>/delete">
-                                                    <i class="bi bi-trash"></i>
-                                                    Apagar
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <% }) %>
-                                </div>
-                                <% } %>
-                    </article>
-                </section>
-            </main>
+        <p>
+          Tem certeza que deseja apagar <strong><%= musicDel.name %></strong>?
+        </p>
 
-            <% if (music) { %>
-                <section id="modal">
-                    <div id="card">
-                        <h2>Editar música</h2>
+        <div id="btn-confirm">
+          <a id="no" href="/admin">Cancelar</a>
 
-                        <a id="close-modal" href="/admin">
-                            <i class="bi bi-x-lg"></i>
-                        </a>
-
-                        <hr>
-
-                        <form id="form-modal" action="/update/<%= music._id %>" method="POST">
-                            <label for="edit-name">Nome da música</label>
-                            <input id="edit-name" name="name" type="text" value="<%= music.name %>" required>
-
-                            <label for="edit-author">Artista</label>
-                            <input id="edit-author" name="author" type="text" value="<%= music.author %>" required>
-
-                            <label for="edit-playlist">Playlist</label>
-                            <input id="edit-playlist" name="playlist" type="text" list="playlist-options"
-                                value="<%= music.playlist || 'Geral' %>">
-
-                            <label for="edit-linkImage">Capa</label>
-                            <input id="edit-linkImage" name="linkImage" type="url" value="<%= music.linkImage %>"
-                                required>
-
-                            <label for="edit-linkMusic">Música</label>
-                            <input id="edit-linkMusic" name="linkMusic" type="url" value="<%= music.linkMusic %>"
-                                required>
-
-                            <button type="submit">Salvar alterações</button>
-                        </form>
-                    </div>
-                </section>
-                <% } %>
-
-                    <% if (musicDel) { %>
-                        <section id="modal">
-                            <div id="card">
-                                <h2>Apagar música</h2>
-
-                                <a id="close-modal" href="/admin">
-                                    <i class="bi bi-x-lg"></i>
-                                </a>
-
-                                <hr>
-
-                                <p>
-                                    Tem certeza que deseja apagar <strong>
-                                        <%= musicDel.name %>
-                                    </strong>?
-                                </p>
-
-                                <div id="btn-confirm">
-                                    <a id="no" href="/admin">Cancelar</a>
-                                    <form class="delete-form" action="/delete/<%= musicDel._id %>" method="POST">
-                                        <button id="yes" type="submit">Apagar</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </section>
-                        <% } %>
+          <form class="delete-form" action="/delete/<%= musicDel._id %>" method="POST">
+            <button id="yes" type="submit">Apagar</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  <% } %>
 </body>
-
 </html>

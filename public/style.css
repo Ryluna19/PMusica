@@ -1250,3 +1250,22 @@ section#modal div#card div#btn-confirm button#yes:hover {
     width: 230px;
   }
 }
+
+/* PLAYLIST COVER IMAGES */
+
+.playlist-icon {
+  overflow: hidden;
+}
+
+.playlist-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  display: block;
+}
+
+.playlist-filter.active .playlist-icon,
+.playlist-filter:hover .playlist-icon {
+  box-shadow: 0 0 0 2px rgba(255, 122, 0, 0.35);
+}

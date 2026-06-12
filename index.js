@@ -14,6 +14,38 @@ function getPlaylistOptions(songs) {
     );
 }
 
+// Monta os dados das playlists para exibir na sidebar da home
+function getPlaylistData(songs) {
+    const playlistMap = new Map();
+
+    const songsFromOldest = [...songs].reverse();
+
+    songsFromOldest.forEach((song) => {
+        const playlistName = song.playlist || "Geral";
+
+        if (!playlistMap.has(playlistName)) {
+            playlistMap.set(playlistName, {
+                name: playlistName,
+                count: 0,
+                coverImage: song.linkImage
+            });
+        }
+    });
+
+    songs.forEach((song) => {
+        const playlistName = song.playlist || "Geral";
+        const playlistInfo = playlistMap.get(playlistName);
+
+        if (playlistInfo) {
+            playlistInfo.count += 1;
+        }
+    });
+
+    return [...playlistMap.values()].sort((a, b) =>
+        a.name.localeCompare(b.name)
+    );
+}
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -28,10 +60,12 @@ app.get("/", async (req, res) => {
     try {
         const playlist = await Music.find().sort({ createdAt: -1 });
         const playlistOptions = getPlaylistOptions(playlist);
+        const playlistData = getPlaylistData(playlist);
 
         res.render("index", {
             playlist,
-            playlistOptions
+            playlistOptions,
+            playlistData
         });
     } catch (error) {
         console.error(error);
@@ -43,6 +77,8 @@ app.get("/admin", async (req, res) => {
     try {
         const playlist = await Music.find().sort({ createdAt: -1 });
         const playlistOptions = getPlaylistOptions(playlist);
+
+
 
         res.render("admin", {
             playlist,

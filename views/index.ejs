@@ -1,154 +1,173 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
-  <link rel="stylesheet" href="/style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/style.css">
 
-  <title>Music Playlist Manager</title>
+    <title>Music Playlist Manager</title>
 </head>
 
 <body class="home-page">
-  <nav>
-    <ul>
-      <li>
-        <span class="material-icons">music_note</span>
-      </li>
+    <nav>
+        <ul>
+            <li>
+                <span class="material-icons">music_note</span>
+            </li>
 
-      <li>
-        <a href="/admin" title="Painel administrativo">
-          <i class="bi bi-gear"></i>
-        </a>
-      </li>
-    </ul>
-  </nav>
+            <li>
+                <a href="/admin" title="Painel administrativo">
+                    <i class="bi bi-gear"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
 
-  <main class="home-container">
-    <section class="hero">
-      <span class="eyebrow">Music Playlist Manager</span>
-      <h1>Playlist</h1>
-      <p>Gerencie suas músicas por playlist e reproduza tudo direto pelo navegador.</p>
-    </section>
+    <main class="home-container">
+        <section class="hero">
+            <span class="eyebrow">Music Playlist Manager</span>
+            <h1>Playlist</h1>
+            <p>Gerencie suas músicas por playlist e reproduza tudo direto pelo navegador.</p>
+        </section>
 
-    <section class="home-app">
-      <aside class="playlist-sidebar">
-        <div class="sidebar-header">
-          <span>Biblioteca</span>
-          <h2>Playlists</h2>
-        </div>
+        <section class="home-app">
+            <aside class="playlist-sidebar">
+                <div class="sidebar-header">
+                    <span>Biblioteca</span>
+                    <h2>Playlists</h2>
+                </div>
 
-        <button class="playlist-filter active" type="button" data-playlist-filter="all">
-          <div class="playlist-icon">
-            <i class="bi bi-collection-play"></i>
-          </div>
+                <% const allMusicCover=playlist.length> 0 ? playlist[playlist.length - 1].linkImage : ""; %>
 
-          <div>
-            <strong>Todas as músicas</strong>
-            <span><%= playlist.length %> música(s)</span>
-          </div>
+                    <button class="playlist-filter active" type="button" data-playlist-filter="all">
+                        <div class="playlist-icon">
+                            <% if (allMusicCover) { %>
+                                <img src="<%= allMusicCover %>" alt="Capa de todas as músicas">
+                                <% } else { %>
+                                    <i class="bi bi-collection-play"></i>
+                                    <% } %>
+                        </div>
+
+                        <div>
+                            <strong>Todas as músicas</strong>
+                            <span>
+                                <%= playlist.length %> música(s)
+                            </span>
+                        </div>
+                    </button>
+
+                    <% playlistData.forEach((playlistItem)=> { %>
+                        <button class="playlist-filter" type="button" data-playlist-filter="<%= playlistItem.name %>">
+                            <div class="playlist-icon">
+                                <% if (playlistItem.coverImage) { %>
+                                    <img src="<%= playlistItem.coverImage %>"
+                                        alt="Capa da playlist <%= playlistItem.name %>">
+                                    <% } else { %>
+                                        <i class="bi bi-music-note-list"></i>
+                                        <% } %>
+                            </div>
+
+                            <div>
+                                <strong>
+                                    <%= playlistItem.name %>
+                                </strong>
+                                <span>
+                                    <%= playlistItem.count %> música(s)
+                                </span>
+                            </div>
+                        </button>
+                        <% }) %>
+            </aside>
+
+            <section class="player-layout">
+                <article class="current-card">
+                    <img id="currentImg" src="/img/musicoff.jpg" alt="Capa da música atual">
+
+                    <div class="current-info">
+                        <span>Tocando agora</span>
+                        <h2 id="currentName">Nenhuma música selecionada</h2>
+                        <p id="currentArtist">Escolha uma música da playlist</p>
+                    </div>
+                </article>
+
+                <article class="playlist-card">
+                    <div class="playlist-header">
+                        <div>
+                            <h2 id="playlistTitle">Todas as músicas</h2>
+                            <span id="playlistCount">
+                                <%= playlist.length %> música(s)
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="search-box">
+                        <i class="bi bi-search"></i>
+                        <input id="search-music" type="text" placeholder="Buscar por música, artista ou playlist">
+                    </div>
+
+                    <% if (playlist.length===0) { %>
+                        <p class="empty-message">Nenhuma música cadastrada ainda.</p>
+                        <% } else { %>
+                            <div class="playlist-list">
+                                <% playlist.forEach((music, index)=> { %>
+                                    <button class="music-row" type="button" data-index="<%= index %>"
+                                        data-name="<%= music.name %>" data-author="<%= music.author %>"
+                                        data-playlist="<%= music.playlist || 'Geral' %>"
+                                        data-image="<%= music.linkImage %>" data-audio="<%= music.linkMusic %>">
+                                        <img src="<%= music.linkImage %>" alt="Capa de <%= music.name %>">
+
+                                        <div>
+                                            <strong>
+                                                <%= music.name %>
+                                            </strong>
+                                            <span>
+                                                <%= music.author %>
+                                            </span>
+                                            <small>
+                                                <%= music.playlist || "Geral" %>
+                                            </small>
+                                        </div>
+
+                                        <i class="bi bi-play-fill"></i>
+                                    </button>
+                                    <% }) %>
+                            </div>
+                            <% } %>
+                </article>
+            </section>
+        </section>
+    </main>
+
+    <section id="controls">
+        <button id="prev-control" type="button" title="Música anterior">
+            <i class="bi bi-skip-start-fill"></i>
         </button>
 
-        <% playlistOptions.forEach((playlistName) => { %>
-          <% const totalByPlaylist = playlist.filter((music) => (music.playlist || "Geral") === playlistName).length; %>
+        <button id="play-control" type="button" title="Tocar/Pausar">
+            <i class="bi bi-play-fill"></i>
+        </button>
 
-          <button class="playlist-filter" type="button" data-playlist-filter="<%= playlistName %>">
-            <div class="playlist-icon">
-              <i class="bi bi-music-note-list"></i>
-            </div>
+        <button id="next-control" type="button" title="Próxima música">
+            <i class="bi bi-skip-end-fill"></i>
+        </button>
 
-            <div>
-              <strong><%= playlistName %></strong>
-              <span><%= totalByPlaylist %> música(s)</span>
-            </div>
-          </button>
-        <% }) %>
-      </aside>
+        <span id="current-duration">00:00</span>
 
-      <section class="player-layout">
-        <article class="current-card">
-          <img id="currentImg" src="/img/musicoff.jpg" alt="Capa da música atual">
+        <input id="progressbar" type="range" min="0" max="0" value="0" step="1">
 
-          <div class="current-info">
-            <span>Tocando agora</span>
-            <h2 id="currentName">Nenhuma música selecionada</h2>
-            <p id="currentArtist">Escolha uma música da playlist</p>
-          </div>
-        </article>
+        <span id="total-duration">00:00</span>
 
-        <article class="playlist-card">
-          <div class="playlist-header">
-            <div>
-              <h2 id="playlistTitle">Todas as músicas</h2>
-              <span id="playlistCount"><%= playlist.length %> música(s)</span>
-            </div>
-          </div>
-
-          <div class="search-box">
-            <i class="bi bi-search"></i>
-            <input id="search-music" type="text" placeholder="Buscar por música, artista ou playlist">
-          </div>
-
-          <% if (playlist.length === 0) { %>
-            <p class="empty-message">Nenhuma música cadastrada ainda.</p>
-          <% } else { %>
-            <div class="playlist-list">
-              <% playlist.forEach((music, index) => { %>
-                <button
-                  class="music-row"
-                  type="button"
-                  data-index="<%= index %>"
-                  data-name="<%= music.name %>"
-                  data-author="<%= music.author %>"
-                  data-playlist="<%= music.playlist || 'Geral' %>"
-                  data-image="<%= music.linkImage %>"
-                  data-audio="<%= music.linkMusic %>"
-                >
-                  <img src="<%= music.linkImage %>" alt="Capa de <%= music.name %>">
-
-                  <div>
-                    <strong><%= music.name %></strong>
-                    <span><%= music.author %></span>
-                    <small><%= music.playlist || "Geral" %></small>
-                  </div>
-
-                  <i class="bi bi-play-fill"></i>
-                </button>
-              <% }) %>
-            </div>
-          <% } %>
-        </article>
-      </section>
+        <input id="volume" type="range" min="0" max="100" value="80" step="1">
     </section>
-  </main>
 
-  <section id="controls">
-    <button id="prev-control" type="button" title="Música anterior">
-      <i class="bi bi-skip-start-fill"></i>
-    </button>
+    <audio id="audio-player"></audio>
 
-    <button id="play-control" type="button" title="Tocar/Pausar">
-      <i class="bi bi-play-fill"></i>
-    </button>
-
-    <button id="next-control" type="button" title="Próxima música">
-      <i class="bi bi-skip-end-fill"></i>
-    </button>
-
-    <span id="current-duration">00:00</span>
-
-    <input id="progressbar" type="range" min="0" max="0" value="0" step="1">
-
-    <span id="total-duration">00:00</span>
-
-    <input id="volume" type="range" min="0" max="100" value="80" step="1">
-  </section>
-
-  <audio id="audio-player"></audio>
-
-  <script src="/script.js"></script>
+    <script src="/script.js"></script>
 </body>
+
 </html>

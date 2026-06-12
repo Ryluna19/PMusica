@@ -116,7 +116,7 @@ app.post("/update/:id", async (req, res) => {
   }
 });
 
-app.get("/delete/:id", async (req, res) => {
+app.post("/delete/:id", async (req, res) => {
   try {
     await Music.findByIdAndDelete(req.params.id);
 

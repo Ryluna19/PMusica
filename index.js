@@ -6,6 +6,14 @@ const path = require("path");
 const connectToDatabase = require("./database/db");
 const Music = require("./model/Music");
 
+function getPlaylistOptions(songs) {
+    const playlists = songs.map((song) => song.playlist || "Geral");
+
+    return [...new Set(["Geral", ...playlists])].sort((a, b) =>
+        a.localeCompare(b)
+    );
+}
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -30,9 +38,11 @@ app.get("/", async (req, res) => {
 app.get("/admin", async (req, res) => {
     try {
         const playlist = await Music.find().sort({ createdAt: -1 });
+        const playlistOptions = getPlaylistOptions(playlist);
 
         res.render("admin", {
             playlist,
+            playlistOptions,
             music: null,
             musicDel: null
         });
@@ -71,6 +81,7 @@ app.get("/by/:id/:action", async (req, res) => {
 
         const music = await Music.findById(id);
         const playlist = await Music.find().sort({ createdAt: -1 });
+        const playlistOptions = getPlaylistOptions(playlist);
 
         if (!music) {
             return res.redirect("/admin");
@@ -79,6 +90,7 @@ app.get("/by/:id/:action", async (req, res) => {
         if (action === "edit") {
             return res.render("admin", {
                 playlist,
+                playlistOptions,
                 music,
                 musicDel: null
             });
@@ -86,6 +98,7 @@ app.get("/by/:id/:action", async (req, res) => {
 
         return res.render("admin", {
             playlist,
+            playlistOptions,
             music: null,
             musicDel: music
         });

@@ -30,6 +30,12 @@
         </ul>
     </nav>
 
+    <datalist id="playlist-options">
+        <% playlistOptions.forEach((playlistName)=> { %>
+            <option value="<%= playlistName %>"></option>
+            <% }) %>
+    </datalist>
+
     <main class="admin-container">
         <section class="admin-hero">
             <span class="eyebrow">Painel administrativo</span>
@@ -53,9 +59,10 @@
                     <label for="author">Artista</label>
                     <input id="author" name="author" type="text" placeholder="Ex: The Weeknd" required>
 
+
                     <label for="playlist">Playlist</label>
-                    <input id="playlist" name="playlist" type="text" placeholder="Ex: Rock, Eletrônico, Lo-fi"
-                        value="Geral">
+                    <input id="playlist" name="playlist" type="text" list="playlist-options"
+                        placeholder="Escolha ou digite uma playlist" value="Geral">
 
                     <label for="linkImage">Capa</label>
                     <input id="linkImage" name="linkImage" type="url" placeholder="Link da imagem da capa" required>
@@ -139,7 +146,8 @@
                     <input id="edit-author" name="author" type="text" value="<%= music.author %>" required>
 
                     <label for="edit-playlist">Playlist</label>
-                    <input id="edit-playlist" name="playlist" type="text" value="<%= music.playlist || 'Geral' %>">
+                    <input id="edit-playlist" name="playlist" type="text" list="playlist-options"
+                        value="<%= music.playlist || 'Geral' %>">
 
                     <label for="edit-linkImage">Capa</label>
                     <input id="edit-linkImage" name="linkImage" type="url" value="<%= music.linkImage %>" required>

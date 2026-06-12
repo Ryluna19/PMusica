@@ -12,6 +12,12 @@ const musicSchema = new mongoose.Schema(
       required: true,
       trim: true
     },
+    playlist: {
+      type: String,
+      required: true,
+      trim: true,
+      default: "Geral"
+    },
     linkImage: {
       type: String,
       required: true,

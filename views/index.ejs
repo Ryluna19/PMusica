@@ -62,6 +62,7 @@
                 data-index="<%= index %>"
                 data-name="<%= music.name %>"
                 data-author="<%= music.author %>"
+                data-playlist="<%= music.playlist || 'Geral' %>"
                 data-image="<%= music.linkImage %>"
                 data-audio="<%= music.linkMusic %>"
               >
@@ -70,6 +71,7 @@
                 <div>
                   <strong><%= music.name %></strong>
                   <span><%= music.author %></span>
+                  <small><%= music.playlist || "Geral" %></small>
                 </div>
 
                 <i class="bi bi-play-fill"></i>

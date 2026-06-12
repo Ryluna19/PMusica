@@ -53,6 +53,10 @@
                     <label for="author">Artista</label>
                     <input id="author" name="author" type="text" placeholder="Ex: The Weeknd" required>
 
+                    <label for="playlist">Playlist</label>
+                    <input id="playlist" name="playlist" type="text" placeholder="Ex: Rock, Eletrônico, Lo-fi"
+                        value="Geral">
+
                     <label for="linkImage">Capa</label>
                     <input id="linkImage" name="linkImage" type="url" placeholder="Link da imagem da capa" required>
 
@@ -93,8 +97,10 @@
                                         <span>
                                             <%= musicItem.author %>
                                         </span>
+                                        <small>
+                                            <%= musicItem.playlist || "Geral" %>
+                                        </small>
                                     </div>
-
                                     <div class="admin-actions">
                                         <a class="edit-action" href="/by/<%= musicItem._id %>/edit">
                                             <i class="bi bi-pencil-square"></i>
@@ -131,6 +137,9 @@
 
                     <label for="edit-author">Artista</label>
                     <input id="edit-author" name="author" type="text" value="<%= music.author %>" required>
+
+                    <label for="edit-playlist">Playlist</label>
+                    <input id="edit-playlist" name="playlist" type="text" value="<%= music.playlist || 'Geral' %>">
 
                     <label for="edit-linkImage">Capa</label>
                     <input id="edit-linkImage" name="linkImage" type="url" value="<%= music.linkImage %>" required>

@@ -269,6 +269,16 @@ Por isso, o projeto utiliza um arquivo `.env.example` como modelo de configuraç
 
 <div align="center">
 
+🔁 Evolução do projeto
+
+Este projeto foi originalmente desenvolvido como estudo e posteriormente refatorado para melhorar estrutura, visual, organização do código e funcionalidades.
+
+A versão atual conta com playlists, busca, player customizado, área administrativa, feedback visual e integração com MongoDB Atlas.
+
+Também mantive uma demonstração antiga do projeto para registrar a evolução da aplicação:
+
+.github/archive/recording.webm
+
 ## 👨‍💻 Autor
 
 **Ryan Santos**

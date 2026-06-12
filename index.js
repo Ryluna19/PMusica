@@ -27,8 +27,12 @@ connectToDatabase();
 app.get("/", async (req, res) => {
     try {
         const playlist = await Music.find().sort({ createdAt: -1 });
+        const playlistOptions = getPlaylistOptions(playlist);
 
-        res.render("index", { playlist });
+        res.render("index", {
+            playlist,
+            playlistOptions
+        });
     } catch (error) {
         console.error(error);
         res.status(500).send("Erro ao carregar a playlist.");

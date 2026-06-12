@@ -1,4 +1,9 @@
 const musicRows = Array.from(document.querySelectorAll(".music-row"));
+const filterButtons = Array.from(document.querySelectorAll(".playlist-filter"));
+
+const searchInput = document.querySelector("#search-music");
+const playlistTitle = document.querySelector("#playlistTitle");
+const playlistCount = document.querySelector("#playlistCount");
 
 const audioPlayer = document.querySelector("#audio-player");
 const currentImg = document.querySelector("#currentImg");
@@ -19,151 +24,237 @@ const totalDuration = document.querySelector("#total-duration");
 
 let currentIndex = 0;
 let isPlaying = false;
+let selectedPlaylist = "all";
+let filteredIndexes = [];
 
 const playlist = musicRows.map((row) => ({
-    name: row.dataset.name,
-    author: row.dataset.author,
-    image: row.dataset.image,
-    audio: row.dataset.audio
+  name: row.dataset.name,
+  author: row.dataset.author,
+  playlist: row.dataset.playlist || "Geral",
+  image: row.dataset.image,
+  audio: row.dataset.audio
 }));
 
 function secondsToMinutes(time) {
-    if (!time || Number.isNaN(time)) {
-        return "00:00";
-    }
+  if (!time || Number.isNaN(time)) {
+    return "00:00";
+  }
 
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
+  const minutes = Math.floor(time / 60);
+  const seconds = Math.floor(time % 60);
 
-    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
 function updateActiveRow() {
-    musicRows.forEach((row, index) => {
-        row.classList.toggle("active", index === currentIndex);
-    });
+  musicRows.forEach((row, index) => {
+    row.classList.toggle("active", index === currentIndex);
+  });
+}
+
+function applyFilters() {
+  const searchTerm = searchInput.value.trim().toLowerCase();
+
+  filteredIndexes = [];
+
+  musicRows.forEach((row, index) => {
+    const music = playlist[index];
+
+    const matchesPlaylist =
+      selectedPlaylist === "all" || music.playlist === selectedPlaylist;
+
+    const matchesSearch =
+      !searchTerm ||
+      music.name.toLowerCase().includes(searchTerm) ||
+      music.author.toLowerCase().includes(searchTerm) ||
+      music.playlist.toLowerCase().includes(searchTerm);
+
+    const shouldShow = matchesPlaylist && matchesSearch;
+
+    row.hidden = !shouldShow;
+
+    if (shouldShow) {
+      filteredIndexes.push(index);
+    }
+  });
+
+  playlistTitle.innerText =
+    selectedPlaylist === "all" ? "Todas as músicas" : selectedPlaylist;
+
+  playlistCount.innerText = `${filteredIndexes.length} música(s)`;
+
+  updateActiveRow();
 }
 
 function loadMusic(index) {
-    if (playlist.length === 0) {
-        return;
-    }
+  if (playlist.length === 0) {
+    return;
+  }
 
-    currentIndex = index;
+  currentIndex = index;
 
-    const music = playlist[currentIndex];
+  const music = playlist[currentIndex];
 
-    currentImg.src = music.image;
-    currentName.innerText = music.name;
-    currentArtist.innerText = music.author;
+  currentImg.src = music.image;
+  currentName.innerText = music.name;
+  currentArtist.innerText = `${music.author} • ${music.playlist}`;
 
-    audioPlayer.src = music.audio;
-    audioPlayer.volume = Number(volume.value) / 100;
+  audioPlayer.src = music.audio;
+  audioPlayer.volume = Number(volume.value) / 100;
 
-    progressbar.value = 0;
-    currentDuration.innerText = "00:00";
-    totalDuration.innerText = "00:00";
+  progressbar.value = 0;
+  currentDuration.innerText = "00:00";
+  totalDuration.innerText = "00:00";
 
-    updateActiveRow();
+  updateActiveRow();
 }
 
 async function playMusic() {
-    if (playlist.length === 0) {
-        return;
-    }
+  if (playlist.length === 0) {
+    return;
+  }
 
-    if (!audioPlayer.src) {
-        loadMusic(currentIndex);
-    }
-    if (audioPlayer.ended) {
-        audioPlayer.currentTime = 0;
-    }
+  if (!audioPlayer.src) {
+    loadMusic(currentIndex);
+  }
 
-    try {
-        await audioPlayer.play();
+  if (audioPlayer.ended) {
+    audioPlayer.currentTime = 0;
+  }
 
-        isPlaying = true;
-        playButtonIcon.classList.remove("bi-play-fill");
-        playButtonIcon.classList.add("bi-pause-fill");
-    } catch (error) {
-        console.error("Erro ao reproduzir a música:", error);
-    }
+  try {
+    await audioPlayer.play();
+
+    isPlaying = true;
+    playButtonIcon.classList.remove("bi-play-fill");
+    playButtonIcon.classList.add("bi-pause-fill");
+  } catch (error) {
+    console.error("Erro ao reproduzir a música:", error);
+  }
 }
 
 function pauseMusic() {
-    audioPlayer.pause();
+  audioPlayer.pause();
 
-    isPlaying = false;
-    playButtonIcon.classList.remove("bi-pause-fill");
-    playButtonIcon.classList.add("bi-play-fill");
+  isPlaying = false;
+  playButtonIcon.classList.remove("bi-pause-fill");
+  playButtonIcon.classList.add("bi-play-fill");
 }
 
 function togglePlay() {
-    if (isPlaying) {
-        pauseMusic();
-    } else {
-        playMusic();
-    }
+  if (isPlaying) {
+    pauseMusic();
+  } else {
+    playMusic();
+  }
+}
+
+function getNextFilteredIndex() {
+  if (filteredIndexes.length === 0) {
+    return null;
+  }
+
+  const currentPosition = filteredIndexes.indexOf(currentIndex);
+
+  if (currentPosition === -1 || currentPosition === filteredIndexes.length - 1) {
+    return filteredIndexes[0];
+  }
+
+  return filteredIndexes[currentPosition + 1];
+}
+
+function getPreviousFilteredIndex() {
+  if (filteredIndexes.length === 0) {
+    return null;
+  }
+
+  const currentPosition = filteredIndexes.indexOf(currentIndex);
+
+  if (currentPosition === -1 || currentPosition === 0) {
+    return filteredIndexes[filteredIndexes.length - 1];
+  }
+
+  return filteredIndexes[currentPosition - 1];
 }
 
 function nextMusic() {
-    if (playlist.length === 0) {
-        return;
-    }
+  const nextIndex = getNextFilteredIndex();
 
-    currentIndex = (currentIndex + 1) % playlist.length;
-    loadMusic(currentIndex);
-    playMusic();
+  if (nextIndex === null) {
+    return;
+  }
+
+  loadMusic(nextIndex);
+  playMusic();
 }
 
 function previousMusic() {
-    if (playlist.length === 0) {
-        return;
-    }
+  const previousIndex = getPreviousFilteredIndex();
 
-    currentIndex = currentIndex === 0 ? playlist.length - 1 : currentIndex - 1;
-    loadMusic(currentIndex);
-    playMusic();
+  if (previousIndex === null) {
+    return;
+  }
+
+  loadMusic(previousIndex);
+  playMusic();
 }
 
 musicRows.forEach((row, index) => {
-    row.addEventListener("click", () => {
-        const isSameMusic = index === currentIndex && audioPlayer.src;
+  row.addEventListener("click", () => {
+    const isSameMusic = index === currentIndex && audioPlayer.src;
 
-        if (isSameMusic) {
-            togglePlay();
-            return;
-        }
+    if (isSameMusic) {
+      togglePlay();
+      return;
+    }
 
-        loadMusic(index);
-        playMusic();
-    });
+    loadMusic(index);
+    playMusic();
+  });
 });
+
+filterButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    selectedPlaylist = button.dataset.playlistFilter;
+
+    filterButtons.forEach((filterButton) => {
+      filterButton.classList.remove("active");
+    });
+
+    button.classList.add("active");
+
+    applyFilters();
+  });
+});
+
+searchInput.addEventListener("input", applyFilters);
 
 playButton.addEventListener("click", togglePlay);
 nextButton.addEventListener("click", nextMusic);
 prevButton.addEventListener("click", previousMusic);
 
 audioPlayer.addEventListener("loadedmetadata", () => {
-    progressbar.max = Math.floor(audioPlayer.duration);
-    totalDuration.innerText = secondsToMinutes(audioPlayer.duration);
+  progressbar.max = Math.floor(audioPlayer.duration);
+  totalDuration.innerText = secondsToMinutes(audioPlayer.duration);
 });
 
 audioPlayer.addEventListener("timeupdate", () => {
-    progressbar.value = Math.floor(audioPlayer.currentTime);
-    currentDuration.innerText = secondsToMinutes(audioPlayer.currentTime);
+  progressbar.value = Math.floor(audioPlayer.currentTime);
+  currentDuration.innerText = secondsToMinutes(audioPlayer.currentTime);
 });
 
 audioPlayer.addEventListener("ended", nextMusic);
 
 progressbar.addEventListener("input", () => {
-    audioPlayer.currentTime = Number(progressbar.value);
+  audioPlayer.currentTime = Number(progressbar.value);
 });
 
 volume.addEventListener("input", () => {
-    audioPlayer.volume = Number(volume.value) / 100;
+  audioPlayer.volume = Number(volume.value) / 100;
 });
 
 if (playlist.length > 0) {
-    loadMusic(0);
+  loadMusic(0);
 }
+
+applyFilters();

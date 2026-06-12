@@ -1,17 +1,20 @@
-const mongodb = require("mongoose");
-mongodb.set("strictQuery" , true);
-const conectToDb = async () => {
-    await mongodb.connect( process.env.DB_URI,
+const mongoose = require("mongoose");
 
-        {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        }
+mongoose.set("strictQuery", true);
 
-    ).then(() => {
-        console.log("Mongo db conectado com sucesso!");
-    }).catch((err) => console.log(err));
-};
+async function connectToDatabase() {
+  try {
+    if (!process.env.DB_URI) {
+      throw new Error("DB_URI não foi definida no arquivo .env.");
+    }
 
+    await mongoose.connect(process.env.DB_URI);
 
-module.exports = conectToDb;
+    console.log("MongoDB conectado com sucesso!");
+  } catch (error) {
+    console.error("Erro ao conectar no MongoDB:");
+    console.error(error.message);
+  }
+}
+
+module.exports = connectToDatabase;

@@ -1,3 +1,4 @@
+// Select DOM elements used by the music player and filters
 const musicRows = Array.from(document.querySelectorAll(".music-row"));
 const filterButtons = Array.from(document.querySelectorAll(".playlist-filter"));
 
@@ -22,11 +23,13 @@ const volume = document.querySelector("#volume");
 const currentDuration = document.querySelector("#current-duration");
 const totalDuration = document.querySelector("#total-duration");
 
+// Player state
 let currentIndex = 0;
 let isPlaying = false;
 let selectedPlaylist = "all";
 let filteredIndexes = [];
 
+// Build the playlist data from the music rows rendered by EJS
 const playlist = musicRows.map((row) => ({
   name: row.dataset.name,
   author: row.dataset.author,
@@ -35,6 +38,7 @@ const playlist = musicRows.map((row) => ({
   audio: row.dataset.audio
 }));
 
+// Convert seconds into mm:ss format
 function secondsToMinutes(time) {
   if (!time || Number.isNaN(time)) {
     return "00:00";
@@ -46,12 +50,14 @@ function secondsToMinutes(time) {
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
+// Highlight the selected song in the list
 function updateActiveRow() {
   musicRows.forEach((row, index) => {
     row.classList.toggle("active", index === currentIndex);
   });
 }
 
+// Filter songs by selected playlist and search input
 function applyFilters() {
   const searchTerm = searchInput.value.trim().toLowerCase();
 
@@ -86,6 +92,7 @@ function applyFilters() {
   updateActiveRow();
 }
 
+// Load selected song data into the player
 function loadMusic(index) {
   if (playlist.length === 0) {
     return;
@@ -109,6 +116,7 @@ function loadMusic(index) {
   updateActiveRow();
 }
 
+// Start playing the current song
 async function playMusic() {
   if (playlist.length === 0) {
     return;
@@ -133,6 +141,7 @@ async function playMusic() {
   }
 }
 
+// Pause the current song
 function pauseMusic() {
   audioPlayer.pause();
 
@@ -141,6 +150,7 @@ function pauseMusic() {
   playButtonIcon.classList.add("bi-play-fill");
 }
 
+// Toggle between play and pause
 function togglePlay() {
   if (isPlaying) {
     pauseMusic();
@@ -149,6 +159,7 @@ function togglePlay() {
   }
 }
 
+// Get next visible song based on active filters
 function getNextFilteredIndex() {
   if (filteredIndexes.length === 0) {
     return null;
@@ -163,6 +174,7 @@ function getNextFilteredIndex() {
   return filteredIndexes[currentPosition + 1];
 }
 
+// Get previous visible song based on active filters
 function getPreviousFilteredIndex() {
   if (filteredIndexes.length === 0) {
     return null;
@@ -177,6 +189,7 @@ function getPreviousFilteredIndex() {
   return filteredIndexes[currentPosition - 1];
 }
 
+// Play the next visible song based on active filters
 function nextMusic() {
   const nextIndex = getNextFilteredIndex();
 
@@ -188,6 +201,7 @@ function nextMusic() {
   playMusic();
 }
 
+// Play the previous visible song based on active filters
 function previousMusic() {
   const previousIndex = getPreviousFilteredIndex();
 
@@ -199,6 +213,7 @@ function previousMusic() {
   playMusic();
 }
 
+// Event listeners for song selection
 musicRows.forEach((row, index) => {
   row.addEventListener("click", () => {
     const isSameMusic = index === currentIndex && audioPlayer.src;
@@ -213,6 +228,7 @@ musicRows.forEach((row, index) => {
   });
 });
 
+// Event listeners for playlist filters
 filterButtons.forEach((button) => {
   button.addEventListener("click", () => {
     selectedPlaylist = button.dataset.playlistFilter;
@@ -227,32 +243,40 @@ filterButtons.forEach((button) => {
   });
 });
 
+// Event listener for search input
 searchInput.addEventListener("input", applyFilters);
 
+// Event listeners for player controls
 playButton.addEventListener("click", togglePlay);
 nextButton.addEventListener("click", nextMusic);
 prevButton.addEventListener("click", previousMusic);
 
+// Update total duration when audio metadata is loaded
 audioPlayer.addEventListener("loadedmetadata", () => {
   progressbar.max = Math.floor(audioPlayer.duration);
   totalDuration.innerText = secondsToMinutes(audioPlayer.duration);
 });
 
+// Update progress bar while the song plays
 audioPlayer.addEventListener("timeupdate", () => {
   progressbar.value = Math.floor(audioPlayer.currentTime);
   currentDuration.innerText = secondsToMinutes(audioPlayer.currentTime);
 });
 
+// Automatically play next song when the current one ends
 audioPlayer.addEventListener("ended", nextMusic);
 
+// Allow user to seek through the song
 progressbar.addEventListener("input", () => {
   audioPlayer.currentTime = Number(progressbar.value);
 });
 
+// Control audio volume
 volume.addEventListener("input", () => {
   audioPlayer.volume = Number(volume.value) / 100;
 });
 
+// Initial page setup
 if (playlist.length > 0) {
   loadMusic(0);
 }

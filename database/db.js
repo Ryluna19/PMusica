@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 mongoose.set("strictQuery", true);
 
+// Connect application to MongoDB using the DB_URI from .env
 async function connectToDatabase() {
   try {
     if (!process.env.DB_URI) {

@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+// Music schema used to store songs in MongoDB
 const musicSchema = new mongoose.Schema(
   {
     name: {
